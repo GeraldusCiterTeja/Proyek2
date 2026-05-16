@@ -1,6 +1,7 @@
 import '../styles/styles.css';
 import App from './pages/app';
 import NavInitiator from './utils/nav-initiator';
+import PushHelper from './utils/push-helper';
 import { registerSW } from 'virtual:pwa-register';
 
 const app = new App({
@@ -9,9 +10,24 @@ const app = new App({
 
 const renderApp = async () => {
   await app.renderPage();
+  
   NavInitiator.init({
     navLinksContainer: document.querySelector('#navLinks'),
   });
+
+  const btnSubscribe = document.querySelector('#subscribePush');
+  if (btnSubscribe) {
+    btnSubscribe.addEventListener('click', async () => {
+      try {
+        await PushHelper.subscribe();
+        alert('Notifikasi berhasil diaktifkan!');
+        btnSubscribe.disabled = true;
+        btnSubscribe.innerText = '🔔 Notifikasi Aktif';
+      } catch (err) {
+        console.error('Gagal langganan push:', err);
+      }
+    });
+  }
 };
 
 registerSW({

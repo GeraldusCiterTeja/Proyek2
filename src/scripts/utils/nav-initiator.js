@@ -1,5 +1,3 @@
-import PushHelper from './push-helper';
-
 const NavInitiator = {
   init({ navLinksContainer }) {
     this._navLinksContainer = navLinksContainer;
@@ -40,17 +38,5 @@ const NavInitiator = {
     }
   }
 };
-
-const btnSubscribe = document.querySelector('#subscribePush');
-btnSubscribe.addEventListener('click', async () => {
-  try {
-    await PushHelper.subscribe();
-    alert('Notifikasi berhasil diaktifkan!');
-    btnSubscribe.disabled = true;
-    btnSubscribe.innerText = '🔔 Notifikasi Aktif';
-  } catch (err) {
-    console.error('Gagal langganan push:', err);
-  }
-});
 
 export default NavInitiator;
