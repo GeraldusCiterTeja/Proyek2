@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  base: '/GeraldusCiterTeja/Proyek2',
+  base: '/Proyek2/',
   plugins: [
     VitePWA({
       strategy: 'injectManifest',
