@@ -93,7 +93,7 @@ const AddStoryPage = {
       const { lat, lng } = e.latlng;
       if (marker) map.removeLayer(marker);
       marker = L.marker([lat, lng]).addTo(map);
-      
+
       document.querySelector('#lat').value = lat;
       document.querySelector('#lon').value = lng;
       document.querySelector('#locationStatus').innerText = `Koordinat: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
