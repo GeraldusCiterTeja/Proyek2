@@ -11,22 +11,23 @@ const AddStoryPage = {
             <label for="description">Deskripsi</label>
             <textarea id="description" required></textarea>
           </div>
-
           <div class="form-group">
           <label>Ambil Foto</label>
           <video id="video" width="100%" autoplay playsinline style="display:none; border-radius: 8px;"></video>
           <canvas id="canvas" style="display:none;"></canvas>
-          <img id="photoPreview" style="display:none; width:100%; border-radius: 8px;">
+            <img 
+              id="photoPreview" 
+              style="display:none; width:100%; border-radius: 8px;" 
+              alt="Pratinjau foto yang akan diunggah"
+            >
             <div class="button-group">
               <button type="button" id="btnOpenCamera">Buka Kamera</button>
               <button type="button" id="btnCapture" style="display:none;">Ambil Gambar</button>
             </div>
             <label for="imageInput">Pilih Foto Cerita</label>
             <input type="file" id="imageInput" accept="image/*" required >
-
             <img id="photoPreview" alt="Pratinjau foto yang akan diunggah" style="display:none;">
           </div>
-
           <div class="form-group">
             <label>Pilih Lokasi di Peta (Klik pada peta)</label>
             <div id="mapAdd" style="height: 300px; margin-bottom: 10px;"></div>
@@ -34,7 +35,6 @@ const AddStoryPage = {
             <input type="hidden" id="lon" required>
             <p id="locationStatus">Lokasi belum dipilih</p>
           </div>
-
           <button type="submit" id="btnSubmit">Kirim Cerita</button>
         </form>
       </section>

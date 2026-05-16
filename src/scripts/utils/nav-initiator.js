@@ -1,3 +1,5 @@
+import PushHelper from './push-helper';
+
 const NavInitiator = {
   init({ navLinksContainer }) {
     this._navLinksContainer = navLinksContainer;
@@ -11,11 +13,12 @@ const NavInitiator = {
 
     if (token) {
       this._navLinksContainer.innerHTML = `
+        <li><button id="subscribePush">🔔 Aktifkan Notifikasi</button></li>
         <li><a href="#/home">Beranda</a></li>
         <li><a href="#/add-story">Tambah Cerita</a></li>
         <li><button id="btnLogout" class="btn-logout">Logout</button></li>
       `;
-      
+
       this._initialLogoutEvent();
     } else {
       this._navLinksContainer.innerHTML = `
@@ -37,5 +40,17 @@ const NavInitiator = {
     }
   }
 };
+
+const btnSubscribe = document.querySelector('#subscribePush');
+btnSubscribe.addEventListener('click', async () => {
+  try {
+    await PushHelper.subscribe();
+    alert('Notifikasi berhasil diaktifkan!');
+    btnSubscribe.disabled = true;
+    btnSubscribe.innerText = '🔔 Notifikasi Aktif';
+  } catch (err) {
+    console.error('Gagal langganan push:', err);
+  }
+});
 
 export default NavInitiator;

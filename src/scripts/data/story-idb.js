@@ -1,18 +1,29 @@
 import { openDB } from 'idb';
 
-const dbPromise = openDB('story-db', 1, {
+const DATABASE_NAME = 'story-app-db';
+const DATABASE_VERSION = 1;
+const STORE_NAME_PENDING = 'pending-stories';
+
+const dbPromise = openDB(DATABASE_NAME, DATABASE_VERSION, {
   upgrade(db) {
-    db.createObjectStore('stories', { keyPath: 'id' });
-    db.createObjectStore('pending-stories', { keyPath: 'tempId', autoIncrement: true });
+    if (!db.objectStoreNames.contains(STORE_NAME_PENDING)) {
+      db.createObjectStore(STORE_NAME_PENDING, { keyPath: 'id', autoIncrement: true });
+    }
   },
 });
 
-export const StoryIdb = {
-  async putStory(story) {
-    return (await dbPromise).put('stories', story);
+const StoryIdb = {
+  async savePendingStory(storyData) {
+    return (await dbPromise).put(STORE_NAME_PENDING, storyData);
   },
-  async getAllStories() {
-    return (await dbPromise).getAll('stories');
+
+  async getAllPendingStories() {
+    return (await dbPromise).getAll(STORE_NAME_PENDING);
   },
-  // Tambahkan logika delete untuk kriteria Basic
+
+  async deletePendingStory(id) {
+    return (await dbPromise).delete(STORE_NAME_PENDING, id);
+  },
 };
+
+export default StoryIdb;

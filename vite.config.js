@@ -5,6 +5,9 @@ export default defineConfig({
   base: '/',
   plugins: [
     VitePWA({
+      strategy: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
       registerType: 'autoUpdate',
       devOptions: {
         enabled: true, // Agar PWA bisa diuji di localhost saat development
