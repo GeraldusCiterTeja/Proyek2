@@ -1,10 +1,12 @@
-import ApiSource from '../../data/api';
+import ApiSource from '../../data/api'; // Naik 3 tingkat ke folder data
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerIconRetina from 'leaflet/dist/images/marker-icon-2x.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import FavoriteStoryIdb from '../../data/favorite-story-idb';
+import FavoriteStoryIdb from '../../data/favorite-story-idb'; // Naik 3 tingkat ke folder data
+
+// Solusi Vite: Ambil URL aset secara dinamis agar gambar marker tidak hilang saat production build
+const markerIcon = new URL('leaflet/dist/images/marker-icon.png', import.meta.url).href;
+const markerIconRetina = new URL('leaflet/dist/images/marker-icon-2x.png', import.meta.url).href;
+const markerShadow = new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).href;
 
 const defaultIcon = L.icon({
   iconUrl: markerIcon,
@@ -12,6 +14,8 @@ const defaultIcon = L.icon({
   shadowUrl: markerShadow,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
 
 const formatDate = (dateString) => {
@@ -43,7 +47,7 @@ const HomePage = {
     const stories = response.listStory;
     storyContainer.innerHTML = '';
 
-    // 1. Inisialisasi Peta
+    // Inisialisasi Peta
     const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     });
@@ -64,7 +68,7 @@ const HomePage = {
     };
     L.control.layers(baseMaps).addTo(map);
 
-    // 2. Render Data & Marker
+    // Render Data & Marker secara Asinkronus menggunakan for...of
     for (const story of stories) {
       const isFavorite = await FavoriteStoryIdb.getStory(story.id);
 
@@ -86,16 +90,17 @@ const HomePage = {
           <h3>${story.name}</h3>
           <p class="date">${formatDate(story.createdAt)}</p>
           <p class="description">${story.description}</p>
-
+          
           <button class="btn-favorite" data-id="${story.id}">
             ${isFavorite ? '⭐ Hapus Terfavorit' : '🔖 Simpan Terfavorit'}
           </button>
         </div>
       `;
       
+      // Logika tombol klik favorit (IndexedDB)
       const btnFav = storyItem.querySelector('.btn-favorite');
       btnFav.addEventListener('click', async (event) => {
-        event.stopPropagation(); // Menghentikan efek klik agar peta tidak ikut bergeser
+        event.stopPropagation(); // Mencegah peta ikut bergeser saat tombol ditekan
         
         const isCurrentlyFavorite = await FavoriteStoryIdb.getStory(story.id);
 
@@ -110,6 +115,7 @@ const HomePage = {
         }
       });
 
+      // Klik item kartu untuk mengarahkan kamera peta
       storyItem.addEventListener('click', () => {
         map.flyTo([story.lat, story.lon], 13);
         marker.openPopup();

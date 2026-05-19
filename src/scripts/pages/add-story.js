@@ -1,4 +1,5 @@
 import ApiSource from '../data/api';
+import PushHelper from '../utils/push-helper';
 import L from 'leaflet';
 
 const AddStoryPage = {
@@ -108,12 +109,21 @@ const AddStoryPage = {
       formData.append('lat', document.querySelector('#lat').value);
       formData.append('lon', document.querySelector('#lon').value);
 
-      const response = await ApiSource.postStory(formData);
-      if (!response.error) {
-        alert('Cerita berhasil dibagikan!');
-        window.location.hash = '/home';
-      } else {
-        alert('Gagal: ' + response.message);
+      try{
+        const response = await ApiSource.postStory(formData);
+        if (!response.error) {
+          alert('Cerita berhasil dibagikan!');
+          await PushHelper.showLocalNotification('Story App - Berbagi Cerita', {
+            body: 'Hore! Cerita baru Anda berhasil diunggah.',
+            icon: new URL('/icons/icon-192.png', window.location.origin).href,
+            badge: new URL('/icons/icon-192.png', window.location.origin).href,
+          });
+          window.location.hash = '/home';
+        } else {
+          alert(`Gagal: ${response.message}`);
+        }
+      } catch (error){
+        console.error(error);
       }
     });
   },
