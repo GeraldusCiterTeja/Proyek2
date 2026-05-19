@@ -1,8 +1,6 @@
 const PushHelper = {
   async subscribe() {
     const registration = await navigator.serviceWorker.ready;
-    
-    // 1. Minta langganan ke browser menggunakan VAPID Key
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: this._urlB64ToUint8Array(
@@ -10,8 +8,21 @@ const PushHelper = {
       ),
     });
 
-    // 2. Kirim data subscription ke API Dicoding (Kriteria Advance)
     await this._sendSubscriptionToApi(subscription);
+    return subscription;
+  },
+
+  async unsubscribe() {
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+    
+    if (!subscription) return;
+
+    // 1. Kirim request DELETE ke API Dicoding sebelum membatalkan di browser
+    await this._sendUnsubscriptionToApi(subscription.endpoint);
+
+    // 2. Batalkan langganan di browser
+    await subscription.unsubscribe();
   },
 
   async _sendSubscriptionToApi(subscription) {
@@ -27,7 +38,19 @@ const PushHelper = {
     return response.json();
   },
 
-  // Fungsi pembantu untuk mengubah string VAPID ke format yang dimengerti browser
+  async _sendUnsubscriptionToApi(endpoint) {
+    const token = localStorage.getItem('userToken');
+    const response = await fetch('https://story-api.dicoding.dev/v1/notifications/subscribe', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ endpoint }),
+    });
+    return response.json();
+  },
+
   _urlB64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');

@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerIconRetina from 'leaflet/dist/images/marker-icon-2x.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import FavoriteStoryIdb from '../../data/favorite-story-idb';
 
 const defaultIcon = L.icon({
   iconUrl: markerIcon,
@@ -64,7 +65,9 @@ const HomePage = {
     L.control.layers(baseMaps).addTo(map);
 
     // 2. Render Data & Marker
-    stories.forEach((story) => {
+    for (const story of stories) {
+      const isFavorite = await FavoriteStoryIdb.getStory(story.id);
+
       const marker = L.marker([story.lat, story.lon], { icon: defaultIcon }).addTo(map);
       marker.bindPopup(`
         <div class="map-popup">
@@ -83,16 +86,37 @@ const HomePage = {
           <h3>${story.name}</h3>
           <p class="date">${formatDate(story.createdAt)}</p>
           <p class="description">${story.description}</p>
+
+          <button class="btn-favorite" data-id="${story.id}">
+            ${isFavorite ? '⭐ Hapus Terfavorit' : '🔖 Simpan Terfavorit'}
+          </button>
         </div>
       `;
       
+      const btnFav = storyItem.querySelector('.btn-favorite');
+      btnFav.addEventListener('click', async (event) => {
+        event.stopPropagation(); // Menghentikan efek klik agar peta tidak ikut bergeser
+        
+        const isCurrentlyFavorite = await FavoriteStoryIdb.getStory(story.id);
+
+        if (isCurrentlyFavorite) {
+          await FavoriteStoryIdb.deleteStory(story.id);
+          btnFav.innerText = '🔖 Simpan Terfavorit';
+          alert('Cerita dihapus dari daftar favorit.');
+        } else {
+          await FavoriteStoryIdb.putStory(story);
+          btnFav.innerText = '⭐ Hapus Terfavorit';
+          alert('Cerita berhasil disimpan ke favorit!');
+        }
+      });
+
       storyItem.addEventListener('click', () => {
         map.flyTo([story.lat, story.lon], 13);
         marker.openPopup();
       });
 
       storyContainer.appendChild(storyItem);
-    });
+    }
   },
 };
 

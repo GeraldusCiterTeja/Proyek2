@@ -17,14 +17,34 @@ const renderApp = async () => {
 
   const btnSubscribe = document.querySelector('#subscribePush');
   if (btnSubscribe) {
+    const registration = await navigator.serviceWorker.ready;
+    const currentSubscription = await registration.pushManager.getSubscription();
+    
+    // Set status teks awal tombol berdasarkan status langganan aktif
+    let isSubscribed = currentSubscription !== null;
+    btnSubscribe.innerText = isSubscribed ? '🔕 Matikan Notifikasi' : '🔔 Aktifkan Notifikasi';
+
     btnSubscribe.addEventListener('click', async () => {
+      btnSubscribe.disabled = true; // Mencegah klik ganda saat proses jaringan
       try {
-        await PushHelper.subscribe();
-        alert('Notifikasi berhasil diaktifkan!');
-        btnSubscribe.disabled = true;
-        btnSubscribe.innerText = '🔔 Notifikasi Aktif';
+        if (isSubscribed) {
+          // Jika sudah sub, jalankan fungsi Unsubscribe (DELETE)
+          await PushHelper.unsubscribe();
+          alert('Notifikasi berhasil dimatikan.');
+          btnSubscribe.innerText = '🔔 Aktifkan Notifikasi';
+          isSubscribed = false;
+        } else {
+          // Jika belum sub, jalankan fungsi Subscribe (POST)
+          await PushHelper.subscribe();
+          alert('Notifikasi berhasil diaktifkan!');
+          btnSubscribe.innerText = '🔕 Matikan Notifikasi';
+          isSubscribed = true;
+        }
       } catch (err) {
-        console.error('Gagal langganan push:', err);
+        console.error('Gagal mengubah status push notification:', err);
+        alert('Terjadi kesalahan, coba lagi nanti.');
+      } finally {
+        btnSubscribe.disabled = false;
       }
     });
   }

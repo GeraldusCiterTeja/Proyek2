@@ -13,7 +13,7 @@ const NavInitiator = {
       this._navLinksContainer.innerHTML = `
         <li><button id="subscribePush">🔔 Aktifkan Notifikasi</button></li>
         <li><a href="#/home">Beranda</a></li>
-        <li><a href="#/add-story">Tambah Cerita</a></li>
+        <li><a href="#/favorite">Simpan</a></li><li><a href="#/add-story">Tambah Cerita</a></li>
         <li><button id="btnLogout" class="btn-logout">Logout</button></li>
       `;
 
