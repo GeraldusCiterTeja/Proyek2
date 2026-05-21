@@ -1,6 +1,7 @@
 const PushHelper = {
   async subscribe() {
     const registration = await navigator.serviceWorker.ready;
+    const rawVapidKey = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r21CnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk'.trim();
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: this._urlB64ToUint8Array(
