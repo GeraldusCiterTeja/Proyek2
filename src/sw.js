@@ -1,5 +1,8 @@
 import ApiSource from './scripts/data/api';
 import StoryIdb from './scripts/data/story-idb';
+import { precacheAndRoute } from 'workbox-precaching';
+
+precacheAndRoute(self.__WB_MANIFEST);
 
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-new-story') {

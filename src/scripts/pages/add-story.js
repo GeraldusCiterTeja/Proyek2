@@ -1,6 +1,21 @@
 import ApiSource from '../data/api';
 import PushHelper from '../utils/push-helper';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+const markerIcon = new URL('leaflet/dist/images/marker-icon.png', import.meta.url).href;
+const markerIconRetina = new URL('leaflet/dist/images/marker-icon-2x.png', import.meta.url).href;
+const markerShadow = new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).href;
+
+const defaultIcon = L.icon({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIconRetina,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
 
 const AddStoryPage = {
   async render() {
@@ -90,14 +105,21 @@ const AddStoryPage = {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     
     let marker = null;
-    map.on('click', (e) => {
-      const { lat, lng } = e.latlng;
-      if (marker) map.removeLayer(marker);
-      marker = L.marker([lat, lng]).addTo(map);
+    let currentMarker;
 
-      document.querySelector('#lat').value = lat;
-      document.querySelector('#lon').value = lng;
-      document.querySelector('#locationStatus').innerText = `Koordinat: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    map.on('click', (e) => {
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
+
+      if (currentMarker) {
+        map.removeLayer(currentMarker);
+      }
+    
+      currentMarker = L.marker([lat, lng], { icon: defaultIcon }).addTo(map);
+
+      // Update nilai input koordinat (sesuaikan dengan id input Anda)
+      document.querySelector('#latInput').value = lat;
+      document.querySelector('#lonInput').value = lng;
     });
 
     // 3. Submit Data
@@ -113,11 +135,6 @@ const AddStoryPage = {
         const response = await ApiSource.postStory(formData);
         if (!response.error) {
           alert('Cerita berhasil dibagikan!');
-          await PushHelper.showLocalNotification('Story App - Berbagi Cerita', {
-            body: 'Hore! Cerita baru Anda berhasil diunggah.',
-            icon: new URL('/icons/icon-192.png', window.location.origin).href,
-            badge: new URL('/icons/icon-192.png', window.location.origin).href,
-          });
           window.location.hash = '/home';
         } else {
           alert(`Gagal: ${response.message}`);

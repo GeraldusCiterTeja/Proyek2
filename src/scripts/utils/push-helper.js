@@ -28,13 +28,23 @@ const PushHelper = {
 
   async _sendSubscriptionToApi(subscription) {
     const token = localStorage.getItem('userToken');
+    
+    const subscriptionJSON = subscription.toJSON();
+
     const response = await fetch('https://story-api.dicoding.dev/v1/notifications/subscribe', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(subscription),
+
+      body: JSON.stringify({
+        endpoint: subscriptionJSON.endpoint,
+        keys: {
+          auth: subscriptionJSON.keys.auth,
+          p256dh: subscriptionJSON.keys.p256dh,
+        }
+      }),
     });
     return response.json();
   },
