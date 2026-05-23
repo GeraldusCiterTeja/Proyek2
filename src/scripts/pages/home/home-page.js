@@ -3,15 +3,14 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import FavoriteStoryIdb from '../../data/favorite-story-idb'; // Naik 3 tingkat ke folder data
 
-// Solusi Vite: Ambil URL aset secara dinamis agar gambar marker tidak hilang saat production build
-const markerIcon = new URL('leaflet/dist/images/marker-icon.png', import.meta.url).href;
-const markerIconRetina = new URL('leaflet/dist/images/marker-icon-2x.png', import.meta.url).href;
-const markerShadow = new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).href;
+import iconUrl from 'leaflet/dist/images/marker-icon.png';
+import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
+import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
 
 const defaultIcon = L.icon({
-  iconUrl: markerIcon,
-  iconRetinaUrl: markerIconRetina,
-  shadowUrl: markerShadow,
+  iconUrl: iconUrl,
+  iconRetinaUrl: iconRetinaUrl,
+  shadowUrl: shadowUrl,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
