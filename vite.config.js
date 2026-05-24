@@ -11,6 +11,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       devOptions: {
         enabled: true, // Agar PWA bisa diuji di localhost saat development
+        type: 'module',
       },
       manifest: {
         name: 'Story App - Berbagi Cerita',

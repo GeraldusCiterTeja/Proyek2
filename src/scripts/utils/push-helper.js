@@ -1,34 +1,57 @@
 const PushHelper = {
   async subscribe() {
-    const registration = await navigator.serviceWorker.ready;
-    const rawVapidKey = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk'.trim();
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: this._urlB64ToUint8Array(
-        'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk'
-      ),
-    });
+    // 1. Cek apakah browser mendukung Service Worker dan Notifikasi
+    if (!('serviceWorker' in navigator) || !('Notification' in window)) {
+      alert('Browser Anda tidak mendukung fitur notifikasi.');
+      return null;
+    }
 
-    await this._sendSubscriptionToApi(subscription);
-    return subscription;
+    // 2. Minta Izin Notifikasi secara eksplisit ke pengguna (Memunculkan Popup)
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      alert('Izin notifikasi ditolak. Anda tidak akan menerima pemberitahuan.');
+      return null;
+    }
+
+    // 3. Jika izin diberikan ('granted'), barulah proses subscribe dijalankan
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      
+      const rawVapidKey = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk';
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: this._urlB64ToUint8Array(rawVapidKey),
+      });
+
+      // 4. Kirim data langganan ke API Dicoding
+      await this._sendSubscriptionToApi(subscription);
+      return subscription;
+    } catch (error) {
+      console.error('Gagal melakukan subscribe push notification:', error);
+      throw error;
+    }
   },
 
   async unsubscribe() {
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.getSubscription();
-    
-    if (!subscription) return;
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      
+      if (!subscription) return;
 
-    // 1. Kirim request DELETE ke API Dicoding sebelum membatalkan di browser
-    await this._sendUnsubscriptionToApi(subscription.endpoint);
+      // 1. Kirim request DELETE ke API Dicoding sebelum membatalkan di browser
+      await this._sendUnsubscriptionToApi(subscription.endpoint);
 
-    // 2. Batalkan langganan di browser
-    await subscription.unsubscribe();
+      // 2. Batalkan langganan di browser
+      await subscription.unsubscribe();
+    } catch (error) {
+      console.error('Gagal membatalkan push notification:', error);
+    }
   },
 
   async _sendSubscriptionToApi(subscription) {
     const token = localStorage.getItem('userToken');
-    
     const subscriptionJSON = subscription.toJSON();
 
     const response = await fetch('https://story-api.dicoding.dev/v1/notifications/subscribe', {
@@ -37,7 +60,6 @@ const PushHelper = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-
       body: JSON.stringify({
         endpoint: subscriptionJSON.endpoint,
         keys: {
@@ -60,14 +82,6 @@ const PushHelper = {
       body: JSON.stringify({ endpoint }),
     });
     return response.json();
-  },
-
-  async showLocalNotification(title, options) {
-    // Cek apakah fitur Service Worker didukung dan izin notifikasi sudah diberikan
-    if ('serviceWorker' in navigator && Notification.permission === 'granted') {
-      const registration = await navigator.serviceWorker.ready;
-      await registration.showNotification(title, options);
-    }
   },
 
   _urlB64ToUint8Array(base64String) {
